@@ -15,7 +15,7 @@ const menuOptions: MenuOption[] = [
 
 <template>
   <nav>
-    <NMenu :options="menuOptions" />
+    <NMenu :options="menuOptions" mode="horizontal" responsive/>
   </nav>
 
   <RouterView />
@@ -24,7 +24,8 @@ const menuOptions: MenuOption[] = [
 <style scoped>
 nav {
   min-width: 120px;
-  /* padding-right: 3rem; */
-  border-right: 1px solid #e9e9e9;
+  border-bottom: 1px solid #e9e9e9;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 </style>

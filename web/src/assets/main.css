@@ -2,8 +2,8 @@
 
 #app {
   height: 100vh;
-  padding: 1rem;
+  padding: 0 1rem;
   font-family: consolas, monospace;
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
 }
