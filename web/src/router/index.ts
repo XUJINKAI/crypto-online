@@ -6,12 +6,17 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/HomeView.vue')
+      redirect: '/ecdh'
     },
     {
       path: '/ecdh',
       name: 'ecdh',
       component: () => import('../views/EcdhView.vue')
+    },
+    {
+      path: '/hash',
+      name: 'hash',
+      component: () => import('../views/HashView.vue')
     },
     {
       path: '/:pathMatch(.*)',

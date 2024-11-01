@@ -7,3 +7,13 @@
   display: flex;
   flex-direction: column;
 }
+
+.router-link-active {
+  color: #42b983 !important;
+}
+
+@media (max-width: 768px) {
+  .flex-responsive {
+      flex-direction: column;
+  }
+}
