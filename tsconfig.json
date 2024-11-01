@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "commonjs",
+    "lib": ["esnext"],
+    "strict": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "useUnknownInCatchVariables": false,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "noImplicitAny": false,
+    "preserveSymlinks": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "exclude": ["dist/**"]
+}

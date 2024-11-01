@@ -1,0 +1,32 @@
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  micro-bmark:
+    specifier: ^0.3.1
+    version: 0.3.1
+  sm-crypto:
+    specifier: ^0.3.12
+    version: 0.3.12
+  sm-crypto-v2:
+    specifier: ^1.2.2
+    version: link:..
+
+packages:
+
+  /jsbn@1.1.0:
+    resolution: {integrity: sha512-4bYVV3aAMtDTTu4+xsDYa6sy9GyJ69/amsu9sYF2zqjiEoZA5xJi3BrfX3uY+/IekIu7MwdObdbDWpoZdBv3/A==}
+    dev: false
+
+  /micro-bmark@0.3.1:
+    resolution: {integrity: sha512-bNaKObD4yPAAPrpEqp5jO6LJ2sEFgLoFSmRjEY809mJ62+2AehI/K3+RlVpN3Oo92RHpgC2RQhj6b1Tb4dmo+w==}
+    dev: false
+
+  /sm-crypto@0.3.12:
+    resolution: {integrity: sha512-272PBzB4PYaBdeGa41TH9ZlMGLPVRmS36Gs4FjmHwXIdihQypAbhhFWZTaa/3de69q2KfMme1M5O2W5+spAdrg==}
+    dependencies:
+      jsbn: 1.1.0
+    dev: false
