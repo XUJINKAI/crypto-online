@@ -1,0 +1,3 @@
+```sh
+git subtree add --prefix=web/src/crypto/sm-crypto-v2 https://github.com/Cubelrti/sm-crypto-v2.git --squash
+```
