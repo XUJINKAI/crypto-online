@@ -5,7 +5,7 @@ import { sm3 } from './sm3'
 import * as utils from '@noble/curves/abstract/utils';
 import { field, sm2Curve } from './ec';
 import { ONE, ZERO } from './bn';
-import { bytesToHex } from '@/sm3/utils';
+import { bytesToHex } from '../sm3/utils';
 import { ProjPointType } from '@noble/curves/abstract/weierstrass';
 
 export * from './utils'

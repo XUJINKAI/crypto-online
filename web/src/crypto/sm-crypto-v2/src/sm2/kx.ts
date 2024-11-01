@@ -10,7 +10,7 @@ const wPow2 = utils.hexToNumber('80000000000000000000000000000000')
 const wPow2Sub1 = utils.hexToNumber('7fffffffffffffffffffffffffffffff')
 
 // from sm2 sign part, extracted for code reusable.
-function hkdf(z: Uint8Array, keylen: number) {
+export function hkdf(z: Uint8Array, keylen: number) {
   let msg = new Uint8Array(keylen)
   let ct = 1
   let offset = 0

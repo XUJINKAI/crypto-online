@@ -1,4 +1,4 @@
-import { bytesToHex } from '@/sm3/utils'
+import { bytesToHex } from '../sm3/utils'
 import { rotl } from '../sm2/sm3'
 import { arrayToHex, arrayToUtf8, hexToArray } from '../sm2/utils'
 import { utf8ToArray } from '../sm3'
