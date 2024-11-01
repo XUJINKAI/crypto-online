@@ -1,0 +1,19 @@
+{
+  "name": "benchmark",
+  "private": true,
+  "version": "0.1.0",
+  "description": "benchmarks",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "bench": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "micro-bmark": "^0.3.1",
+    "sm-crypto": "^0.3.12",
+    "sm-crypto-v2": "^1.2.2"
+  }
+}
