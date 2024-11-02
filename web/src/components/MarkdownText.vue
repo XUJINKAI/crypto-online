@@ -1,15 +1,17 @@
 <script setup lang='ts'>
-import { computed } from 'vue';
+import { computed, toRefs } from 'vue';
 import { marked } from 'marked';
 
 const props = defineProps<{
     markdown: string;
 }>();
 
+const { markdown } = toRefs(props);
+
 const renderer = new marked.Renderer();
 
 const document = computed<string>(() => {
-    return marked.parse(props.markdown, { renderer }) as any;
+    return marked.parse(markdown.value, { renderer }) as any;
 });
 </script>
 
@@ -17,7 +19,7 @@ const document = computed<string>(() => {
     <div class="markd" v-html="document"></div>
 </template>
 
-<style scoped>
+<style>
 .markd {
     font-family: consolas, monospace;
     display: flex;
@@ -25,17 +27,20 @@ const document = computed<string>(() => {
     gap: .5rem;
 }
 
-p {
+.markd p {
     margin-bottom: 1rem;
 }
 
-code {
+.markd code {
     border-radius: 4px;
     padding: 3px 6px;
     background-color: rgba(142, 150, 170, .14);
+    display: block;
+    width: 100%;
+    overflow-y: auto;
 }
 
-strong {
+.markd strong {
     font-weight: 700;
 }
 </style>

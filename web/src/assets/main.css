@@ -12,8 +12,23 @@
   color: #42b983 !important;
 }
 
+
+.flex-responsive-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-responsive-row {
+  display: flex;
+  flex-direction: row;
+}
+
 @media (max-width: 768px) {
-  .flex-responsive {
-      flex-direction: column;
+  .flex-responsive-column {
+    flex-direction: row;
+  }
+
+  .flex-responsive-row {
+    flex-direction: column;
   }
 }
