@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: 'clear', data: void): void;
+    (e: 'storage:clear', data: void): void;
 }>();
 
 const dialog = useDialog();
@@ -53,7 +53,7 @@ function clearStorageEventHandler() {
         negativeText: 'Cancel',
         maskClosable: true,
         onPositiveClick: () => {
-            emit('clear');
+            emit('storage:clear');
             storage.value.clear();
             refreshRendered();
         },
