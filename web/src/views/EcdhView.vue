@@ -8,6 +8,7 @@ import { sm3 } from '@/crypto/sm-crypto-v2/src';
 import StoragePanel from '@/components/StoragePanel.vue';
 import { FormatTimestamp } from '@/crypto/DateTime';
 import EcdhHelp from './EcdhHelp';
+import SelectableInput from '@/components/SelectableInput.vue';
 
 const ecdh = new EcdhClass();
 const storage = new LocalStorageSection('ecdh');
@@ -20,7 +21,7 @@ const ls_my_private_key_ref = storage.getValueRef<string>('my_private_key');
 const ls_others_public_key_array_ref = storage.getSortedUniqueArrayRef<{
     pk: string,
     sid: string,
-}>('other_public_key_array');
+}>('other_public_key_array', 20, (a, b) => a.pk === b.pk);
 
 const secret_id = computed(() => {
     if (!ecdh.secret.value) return '';
@@ -99,7 +100,7 @@ async function initData() {
 
     // 监听公钥变化，保存到本地列表
     watch(() => secret_id.value, () => {
-        if (secret_id.value && !ls_others_public_key_array_ref.Find(item => item.sid === secret_id.value)) {
+        if (secret_id.value) {
             ls_others_public_key_array_ref.Push({
                 pk: ecdh.others_public_key.value,
                 sid: secret_id.value,
@@ -228,7 +229,8 @@ function CopyAHrefToClipboard(e: MouseEvent) {
         </div>
         <p class="config-item">
             <span>Other's Public Key:</span>
-            <NInput v-model:value="ecdh.others_public_key.value" placeholder="Input Other's Public Key" />
+            <SelectableInput v-model:value="ecdh.others_public_key.value" placeholder="Input Other's Public Key"
+                :options="ls_others_public_key_array_ref.data.value.map(item => ({ label: `${item.value.sid} : ${item.value.pk}`, value: item.value.pk }))" />
         </p>
         <p class="config-item">
             <span>Secret:</span>

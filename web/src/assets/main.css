@@ -3,7 +3,6 @@
 #app {
   height: 100vh;
   padding: 0 1rem;
-  font-family: consolas, monospace;
   display: flex;
   flex-direction: column;
 }

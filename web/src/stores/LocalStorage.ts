@@ -92,9 +92,9 @@ export class LocalStorageSection {
         });
     }
 
-    getSortedUniqueArrayRef<T>(key: string) {
+    getSortedUniqueArrayRef<T>(key: string, limit: number = 10, fn_ItemEqual?: (a: T, b: T) => boolean) {
         const real_key = this.getKey(key);
-        return new LocalStorageSortedUniqueArray<T>(real_key);
+        return new LocalStorageSortedUniqueArray<T>(real_key, limit, fn_ItemEqual);
     }
 };
 
@@ -103,20 +103,20 @@ type ArrayItem<T> = {
     timestamp: number;
 }
 
-function SortData<T>(data: ArrayItem<T>[]) {
-    data.sort((a, b) => -(a.timestamp - b.timestamp));
-}
-function LimitData<T>(data: ArrayItem<T>[], limit: number) {
-    data.splice(0, data.length - limit);
-}
-
 export class LocalStorageSortedUniqueArray<T> {
     private _key: string;
+    private _limit: number;
+    private _fn_ItemEqual: (a: T, b: T) => boolean;
     private _data = ref<ArrayItem<T>[]>([]);
-    private _limit = 10;
 
     private RetriveData() {
         return GetLocalStorage<ArrayItem<T>[]>(this._key) || [];
+    }
+    private SortData() {
+        this._data.value.sort((a, b) => -(a.timestamp - b.timestamp));
+    }
+    private LimitData() {
+        this._data.value.splice(0, this._data.value.length - this._limit);
     }
     private SaveData() {
         SetLocalStorage(this._key, this._data.value);
@@ -131,16 +131,10 @@ export class LocalStorageSortedUniqueArray<T> {
     }
 
     Push(value: T) {
-        this._data.value = this._data.value.filter(item => item.value !== value);
+        this._data.value = this._data.value.filter(item => !this._fn_ItemEqual(item.value as T, value));
         this._data.value.push({ value: toRaw(value) as UnwrapRef<T>, timestamp: Date.now() });
-        // const find = this._data.value.find(item => item.value === value);
-        // if (find) {
-        //     find.timestamp = Date.now();
-        // } else {
-        //     this._data.value.push({ value: value as UnwrapRef<T>, timestamp: Date.now() });
-        // }
-        SortData(this._data.value);
-        LimitData(this._data.value, this._limit);
+        this.SortData();
+        this.LimitData();
         this.SaveData();
     }
 
@@ -154,10 +148,12 @@ export class LocalStorageSortedUniqueArray<T> {
         this.SaveData();
     }
 
-    constructor(key: string) {
+    constructor(key: string, limit: number, fn_ItemEqual?: (a: T, b: T) => boolean) {
         this._key = key;
+        this._limit = limit;
+        this._fn_ItemEqual = fn_ItemEqual ?? ((a, b) => a === b);
         const _data = this.RetriveData();
-        SortData(_data);
+        this.SortData();
         this._data.value = _data;
     };
 }
