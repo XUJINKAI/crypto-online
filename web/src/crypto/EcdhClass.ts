@@ -4,7 +4,7 @@ import { sm2Curve } from './sm-crypto-v2/src/sm2/ec'
 import { hkdf } from './sm-crypto-v2/src/sm2/kx'
 import { hexToArray, leftPad } from './sm-crypto-v2/src/sm2'
 import { bytesToHex, hexToNumber, numberToHexUnpadded } from '@noble/curves/abstract/utils'
-import type { HexString } from './data'
+import type { HexString } from './Data'
 
 export class EcdhClass {
   static isValidSecretKey = (secret: string) => /^[0-9a-fA-F]{64}$/.test(secret);
@@ -18,6 +18,7 @@ export class EcdhClass {
   })
   others_public_key = ref<HexString>('');
   secret = ref<HexString>('')
+  my_public_error = ref<string>('')
   secret_error = ref<string>('')
 
   encrypt(text: string) {
@@ -51,9 +52,11 @@ export class EcdhClass {
       GetCompressPublicKeyFromPrivateKey(this.my_key_pair.value.private)
         .then(pub => {
           this.my_key_pair.value.public = pub
+          this.my_public_error.value = ''
         })
         .catch(e => {
-          this.my_key_pair.value.public = e
+          this.my_key_pair.value.public = ''
+          this.my_public_error.value = e
         });
     })
     watch(() => [this.my_key_pair.value.private, this.others_public_key.value], () => {
@@ -85,6 +88,9 @@ export function GetCompressPublicKeyFromPrivateKey(private_key: string) {
 function GenerateSecretKey__(my_private_key: string, others_public_key: string) {
   if (!my_private_key) return new Error('No private key');
   if (!others_public_key) return new Error('No public key');
+
+  // 验证私钥合法
+  if (!/^[0-9a-fA-F]{64}$/.test(my_private_key)) return new Error('Invalid private key');
 
   const pub = sm2Curve.ProjectivePoint.fromHex(others_public_key);
   const pri = hexToNumber(my_private_key);

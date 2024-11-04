@@ -62,7 +62,7 @@ function clearStorageEventHandler() {
 </script>
 
 <template>
-    <a href="javascript:void(0)" @click="refreshRendered(); show_storage_panel = true">LocalStorage</a>
+    <NButton type="default" @click="refreshRendered(); show_storage_panel = true" size="small" style="color: black;">LocalStorage</NButton>
     <NModal v-model:show="show_storage_panel">
         <NCard class="card" :bordered="false" size="huge" role="dialog" aria-modal="true">
             <div class="header">

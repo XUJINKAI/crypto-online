@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { computed, nextTick, ref, watch } from 'vue';
-import { NButton, NInput, NUpload, useDialog, useMessage } from 'naive-ui'
+import { NButton, NCheckbox, NInput, NUpload, useDialog, useMessage } from 'naive-ui'
 import MarkdownText from '@/components/MarkdownText.vue';
 import { EcdhClass } from '@/crypto/EcdhClass';
 import { LocalStorageSection } from '@/stores/LocalStorage';
@@ -9,6 +9,7 @@ import StoragePanel from '@/components/StoragePanel.vue';
 import { FormatTimestamp } from '@/crypto/DateTime';
 import EcdhHelp from './EcdhHelp';
 import SelectableInput from '@/components/SelectableInput.vue';
+import ShareBox from '@/components/ShareBox.vue';
 
 const ecdh = new EcdhClass();
 const storage = new LocalStorageSection('ecdh');
@@ -22,6 +23,25 @@ const ls_others_public_key_array_ref = storage.getSortedUniqueArrayRef<{
     pk: string,
     sid: string,
 }>('other_public_key_array', 20, (a, b) => a.pk === b.pk);
+
+const status = computed(() => {
+    if (secret_id.value) {
+        return `Ready to Encrypt/Decrypt, sid=${secret_id.value}`;
+    } else {
+        return 'Waiting for parameter...';
+    }
+})
+const status_style = computed(() => {
+    if (secret_id.value) {
+        return {
+            color: 'green',
+        };
+    } else {
+        return {
+            color: 'red',
+        };
+    }
+});
 
 const secret_id = computed(() => {
     if (!ecdh.secret.value) return '';
@@ -157,75 +177,67 @@ async function initData() {
             message.error("Decrypt From URL Error");
         });
     } else {
-        message.info(msg, { duration: 10000 });
+        // message.info(msg, { duration: 10000 });
     }
 }
 
 initData();
 
 // build url
-type UrlPart = 'share' | 'encrypted' | 'sid';
+const getShareUrl = () => BuildUrl(['share']);
+const getEncryptedUrl = (withShare: boolean) => BuildUrl(['sid', 'encrypted', withShare ? 'share' : null]);
+const encryptedUrlIncludeShare = ref(true);
+
+type UrlPart = 'share' | 'encrypted' | 'sid' | null;
 function BuildUrl(parts: UrlPart[]): string {
     let url = `${location.origin}${location.pathname}?`;
-    parts.forEach((part) => {
+    for (const part of parts) {
+        if (part === null) continue;
         switch (part) {
-            // case 'sk':
-            //   url += `sk=${data.my_key_pair.value.private}&`;
-            //   break;
             case 'share':
+                if (!ecdh.my_key_pair.value.public) return '';
                 url += `share=${ecdh.my_key_pair.value.public}&`;
                 break;
-            // case 'secret':
-            //   url += `secret=${data.secret.value}&`;
-            //   break;
-            // case 'plain':
-            //   url += `plain=${plainText.value}&`;
-            //   break;
             case 'encrypted':
+                if (!encryptedText.value) return '';
                 url += `encrypted=${encryptedText.value}&`;
                 break;
             case 'sid':
+                if (!secret_id.value) return '';
                 url += `sid=${secret_id.value}&`;
                 break;
         }
-    });
+    }
     if (url.endsWith('&')) {
         url = url.slice(0, -1);
     }
     return url;
 }
-
-// event
-function CopyTextToClipboard(text: string) {
-    navigator.clipboard.writeText(text);
-}
-
-function CopyAHrefToClipboard(e: MouseEvent) {
-    e.preventDefault();
-    const url = (e.target as HTMLAnchorElement).href;
-    navigator.clipboard.writeText(url);
-}
 </script>
 
 <template>
     <div class="wrapper">
-        <p>{{ EcdhHelp.description }}
-            <StoragePanel :storage="storage" :renderer="storageRender" @storage:clear="onStorageClear"></StoragePanel>
-        </p>
+        <p>{{ EcdhHelp.desc_CN }}</p>
+        <p style="font-size: .8em;">{{ EcdhHelp.desc_EN }}</p>
+        <ShareBox :url="getShareUrl()" text="此链接包含你的公钥。Your Public Key URL:" share></ShareBox>
 
-        <h2>Config</h2>
+        <h2>Parameter</h2>
+        <div class="" style="">
+            <span style="word-break: break-all;">Status: <span :style="status_style">{{ status }}</span></span>
+            <div style="margin-left: auto; float: right;">
+                <NButton @click="generateKey" size="small" style="color: red;">New Key</NButton>
+                <StoragePanel :storage="storage" :renderer="storageRender" @storage:clear="onStorageClear">
+                </StoragePanel>
+            </div>
+        </div>
         <div class="config-item">
             <span>My Private Key:</span>
             <NInput v-model:value="ecdh.my_key_pair.value.private" type="password" show-password-on="click" />
-            <NButton @click="generateKey" type="warning">Generate</NButton>
         </div>
         <div class="config-item">
             <span>My Public Key:</span>
-            <span
-                style="user-select: all; color: green; background-color: yellow; text-wrap: wrap; word-break: break-all;">
-                {{ ecdh.my_key_pair.value.public }}
-            </span>
-            <a :href="BuildUrl(['share'])" @click="CopyAHrefToClipboard">Copy URL</a>
+            <NInput :value="ecdh.my_key_pair.value.public || ecdh.my_public_error.value.toString()"
+                :status="ecdh.my_public_error.value ? 'error' : 'success'" readonly />
         </div>
         <p class="config-item">
             <span>Other's Public Key:</span>
@@ -236,7 +248,6 @@ function CopyAHrefToClipboard(e: MouseEvent) {
             <span>Secret:</span>
             <NInput v-model:value="ecdh.secret.value" type="password" show-password-on="click"
                 placeholder="Secret Key = (My Private Key) * (Other's Public Key)" />
-            <span style="margin-left: 20px;">sid: {{ secret_id }}</span>
         </p>
 
         <h2>Encrypt/Decrypt</h2>
@@ -247,20 +258,24 @@ function CopyAHrefToClipboard(e: MouseEvent) {
             </div>
 
             <div class="flex-responsive-column" style="gap: 1rem;">
-                <NButton @click="EncryptEventHandler" type="info"> {{ '>> Encrypt' }}</NButton>
-                <NButton @click="DecryptEventHandler" type="success"> {{ 'Decrypt <<' }}</NButton>
+                <NButton @click="EncryptEventHandler" type="success"> {{ 'Encrypt' }}</NButton>
+                <NButton @click="DecryptEventHandler" type="info"> {{ 'Decrypt' }}</NButton>
             </div>
 
             <div style="flex: 1; width: 100%;">
                 <NInput v-model:value="encryptedText" type="textarea" placeholder="Encrypted Text..." rows="5" />
-                <span style="display: flex; gap: 2rem;">
-                    <a href="javascript:void(0)" @click="() => CopyTextToClipboard(encryptedText)">Copy Text</a>
-                    <a :href="BuildUrl(['share', 'encrypted', 'sid'])" @click="CopyAHrefToClipboard">Copy Url</a>
-                </span>
             </div>
         </div>
 
-        <div style="display: flex; gap: 2rem;" class="flex-responsive-row">
+        <div>
+            <NCheckbox v-model:checked="encryptedUrlIncludeShare" style="margin-left: auto;">
+                包括我的公钥. Include My Public Key.
+            </NCheckbox>
+            <ShareBox :url="getEncryptedUrl(encryptedUrlIncludeShare)" text="此链接包含加密后的消息。Encrypted Text URL:" share>
+            </ShareBox>
+        </div>
+
+        <div class="help flex-responsive-row">
             <MarkdownText :markdown="EcdhHelp.help_CN" style="flex: 1;"></MarkdownText>
             <MarkdownText :markdown="EcdhHelp.help_EN" style="flex: 1;"></MarkdownText>
         </div>
@@ -301,5 +316,13 @@ input {
     width: 100%;
     height: 200px;
     flex: 1;
+}
+
+.help {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ccc;
 }
 </style>
