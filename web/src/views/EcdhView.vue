@@ -20,6 +20,24 @@ const message = useMessage();
 
 const plainText = ref('');
 const encryptedText = ref('');
+const decryptError = ref('');
+
+const pauseWatch = ref(false);
+watch(plainText, () => {
+    if (pauseWatch.value) return;
+    pauseWatch.value = true;
+    encryptData().finally(() => {
+        pauseWatch.value = false;
+    });
+}, { immediate: false });
+watch(encryptedText, async () => {
+    if (pauseWatch.value) return;
+    pauseWatch.value = true;
+    decryptData().finally(() => {
+        pauseWatch.value = false;
+    });
+}, { immediate: false });
+
 const ls_my_private_key_ref = storage.getValueRef<string>('my_private_key');
 const ls_others_public_key_array_ref = storage.getSortedUniqueArrayRef<{
     pk: string,
@@ -96,6 +114,8 @@ function generateKey() {
     });
 }
 async function encryptData() {
+    // console.log("enc: ", plainText.value);
+    decryptError.value = '';
     if (plainText.value) {
         const data = await ecdh.encrypt(plainText.value);
         encryptedText.value = data as string;
@@ -104,9 +124,16 @@ async function encryptData() {
     }
 }
 async function decryptData() {
+    // console.log("dec: ", encryptedText.value);
     if (encryptedText.value) {
-        const data = await ecdh.decrypt(encryptedText.value);
-        plainText.value = data as string;
+        try {
+            const data = await ecdh.decrypt(encryptedText.value);
+            plainText.value = data as string;
+            decryptError.value = '';
+        } catch (e) {
+            decryptError.value = `Decrypt Error: ${e}`;
+            plainText.value = '';
+        }
     }
     else {
         plainText.value = '';
@@ -290,7 +317,8 @@ function BuildUrl(parts: UrlPart[]): string {
                     <NButton @click="EncryptFileEventHandler">Encrypt File</NButton>
                 </template>
             </DataBox>
-            <DataBox v-model:data="encryptedText" title="Encrypted Data:" @ctrl+enter="DecryptEventHandler">
+            <DataBox v-model:data="encryptedText" title="Encrypted Data:" @ctrl+enter="DecryptEventHandler"
+                :error='decryptError != ""'>
                 <template #default>
                     <NButton @click="DecryptEventHandler" type="info">Decrypt</NButton>
                     <NButton @click="DecryptFileEventHandler">Decrypt File</NButton>
@@ -300,7 +328,7 @@ function BuildUrl(parts: UrlPart[]): string {
 
         <div style="margin-top: 1rem;">
             <NCheckbox v-model:checked="encryptedUrlIncludeShare" style="margin-left: auto;">
-                包括我的公钥. Include My Public Key.
+                URL包括我的公钥. Include My Public Key.
             </NCheckbox>
             <ShareBox :url="getEncryptedUrl(encryptedUrlIncludeShare)" text="此链接包含加密后的消息。Encrypted Text URL:" share>
             </ShareBox>

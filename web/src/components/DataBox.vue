@@ -6,6 +6,7 @@ import { type HexString } from '@/crypto/Data';
 const props = defineProps<{
     data: HexString;
     title?: string;
+    error?: boolean;
 }>()
 const emit = defineEmits<{
     (e: 'update:data', data: HexString): void;
@@ -29,7 +30,8 @@ const inputRef = ref<InputInst | null>(null);
             <h3>{{ title }}</h3>
         </slot>
         <NInput ref="inputRef" class="input" :value="data" @update:value="d => emit('update:data', d)"
-            @keydown="keydownProcess" type="textarea" rows="5" placeholder="Input Data..." />
+            :status="error === true ? 'error' : 'success'" @keydown="keydownProcess" type="textarea" rows="5"
+            placeholder="Input Data..." />
         <slot> </slot>
     </div>
 </template>
