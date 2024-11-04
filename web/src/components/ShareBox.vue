@@ -31,19 +31,22 @@ const canShare = computed(() => {
     return !!navigator.share && props.share && isMobile();
     return true;
 });
-async function Share() {
+
+async function ClickEventHandler(e: MouseEvent) {
+    await CopyToClipboard();
+}
+
+function preventDefault(e: MouseEvent) {
+    e.preventDefault();
+}
+
+async function Share(e: MouseEvent) {
+    e.preventDefault();
     await navigator.share({
         title: props.title,
         text: props.text,
         url: props.url,
     });
-}
-
-async function ClickEventHandler(e: MouseEvent) {
-    await CopyToClipboard();
-}
-function preventDefault(e: MouseEvent) {
-    e.preventDefault();
 }
 </script>
 

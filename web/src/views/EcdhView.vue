@@ -25,10 +25,14 @@ const ls_others_public_key_array_ref = storage.getSortedUniqueArrayRef<{
 }>('other_public_key_array', 20, (a, b) => a.pk === b.pk);
 
 const status = computed(() => {
-    if (secret_id.value) {
+    if (ecdh.my_public_error.value) {
+        return 'Waiting for My Private Key...';
+    } else if (ecdh.secret_error.value) {
+        return 'Waiting for Other\'s Public Key...';
+    } else if (secret_id.value) {
         return `Ready to Encrypt/Decrypt, sid=${secret_id.value}`;
     } else {
-        return 'Waiting for parameter...';
+        return 'Secret Error...';
     }
 })
 const status_style = computed(() => {
@@ -167,25 +171,30 @@ async function initData() {
     msg += _pk_msg;
 
     await nextTick();
+    let msg_reactive = () => { };
     // 解密文本
     const encrypted = urlParams.get('encrypted');
     if (encrypted) {
         encryptedText.value = encrypted;
         decryptData().then(() => {
-            message.success("Decrypt From URL Success");
+            msg_reactive = () => message.success("Decrypt From URL Success");
         }).catch(() => {
-            message.error("Decrypt From URL Error");
+            msg_reactive = () => message.error("Decrypt From URL Error");
         });
+        if (sid != secret_id.value) {
+            msg_reactive = () => message.warning("sid not match, decrypt may be error");
+        }
     } else {
         // message.info(msg, { duration: 10000 });
     }
+    msg_reactive();
 }
 
 initData();
 
 // build url
 const getShareUrl = () => BuildUrl(['share']);
-const getEncryptedUrl = (withShare: boolean) => BuildUrl(['sid', 'encrypted', withShare ? 'share' : null]);
+const getEncryptedUrl = (withShare: boolean) => BuildUrl([withShare ? 'share' : null, 'encrypted', 'sid']);
 const encryptedUrlIncludeShare = ref(true);
 
 type UrlPart = 'share' | 'encrypted' | 'sid' | null;
@@ -199,7 +208,6 @@ function BuildUrl(parts: UrlPart[]): string {
                 url += `share=${ecdh.my_key_pair.value.public}&`;
                 break;
             case 'encrypted':
-                if (!encryptedText.value) return '';
                 url += `encrypted=${encryptedText.value}&`;
                 break;
             case 'sid':
