@@ -6,9 +6,12 @@ const menuOptions: MenuOption[] = [
   {
     label: () => h(RouterLink, { to: { name: 'ecdh' } }, { default: () => 'ECDH' }), key: 'ecdh'
   },
-  // {
-  //   label: () => h(RouterLink, { to: { name: 'hash' } }, { default: () => 'Hash' }), key: 'hash'
-  // },
+  {
+    label: () => h(RouterLink, { to: { name: 'hash' } }, { default: () => 'Hash' }), key: 'hash'
+  },
+  {
+    label: () => h(RouterLink, { to: { name: 'base64' } }, { default: () => 'Base64' }), key: 'base64'
+  },
 ]
 
 </script>

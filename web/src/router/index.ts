@@ -19,6 +19,11 @@ const router = createRouter({
       component: () => import('../views/HashView.vue')
     },
     {
+      path: '/base64',
+      name: 'base64',
+      component: () => import('../views/Base64View.vue')
+    },
+    {
       path: '/:pathMatch(.*)',
       component: () => import('../views/NotFoundView.vue')
     }
