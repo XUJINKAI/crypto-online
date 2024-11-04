@@ -24,6 +24,11 @@ const router = createRouter({
       component: () => import('../views/Base64View.vue')
     },
     {
+      path: '/qrcode',
+      name: 'qrcode',
+      component: () => import('../views/QRCodeView.vue')
+    },
+    {
       path: '/:pathMatch(.*)',
       component: () => import('../views/NotFoundView.vue')
     }

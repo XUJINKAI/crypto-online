@@ -12,6 +12,9 @@ const menuOptions: MenuOption[] = [
   {
     label: () => h(RouterLink, { to: { name: 'base64' } }, { default: () => 'Base64' }), key: 'base64'
   },
+  {
+    label: () => h(RouterLink, { to: { name: 'qrcode' } }, { default: () => 'QR Code' }), key: 'qrcode'
+  },
 ]
 
 </script>
