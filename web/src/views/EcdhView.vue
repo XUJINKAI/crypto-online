@@ -4,12 +4,14 @@ import { NButton, NCheckbox, NInput, NUpload, useDialog, useMessage } from 'naiv
 import MarkdownText from '@/components/MarkdownText.vue';
 import { EcdhClass } from '@/crypto/EcdhClass';
 import { LocalStorageSection } from '@/stores/LocalStorage';
+import { GetFileDialog, DownloadFile } from '@/stores/FileSystem';
 import { sm3 } from '@/crypto/sm-crypto-v2/src';
 import StoragePanel from '@/components/StoragePanel.vue';
 import { FormatTimestamp } from '@/crypto/DateTime';
 import EcdhHelp from './EcdhHelp';
 import SelectableInput from '@/components/SelectableInput.vue';
 import ShareBox from '@/components/ShareBox.vue';
+import DataBox from '@/components/DataBox.vue';
 
 const ecdh = new EcdhClass();
 const storage = new LocalStorageSection('ecdh');
@@ -94,12 +96,21 @@ function generateKey() {
     });
 }
 async function encryptData() {
-    const data = await ecdh.encrypt(plainText.value);
-    encryptedText.value = data as string;
+    if (plainText.value) {
+        const data = await ecdh.encrypt(plainText.value);
+        encryptedText.value = data as string;
+    } else {
+        encryptedText.value = '';
+    }
 }
 async function decryptData() {
-    const data = await ecdh.decrypt(encryptedText.value);
-    plainText.value = data as string;
+    if (encryptedText.value) {
+        const data = await ecdh.decrypt(encryptedText.value);
+        plainText.value = data as string;
+    }
+    else {
+        plainText.value = '';
+    }
 }
 function EncryptEventHandler() {
     encryptData().then(() => {
@@ -114,6 +125,19 @@ function DecryptEventHandler() {
     }).catch(e => {
         message.error('Decrypt Error: ' + e);
     });
+}
+async function EncryptFileEventHandler() {
+    const result = await GetFileDialog();
+    const uint8array = new Uint8Array(result.data);
+    const enc = await ecdh.encrypt(uint8array) as Uint8Array;
+    DownloadFile(enc, result.name + '.encdata');
+}
+async function DecryptFileEventHandler() {
+    const result = await GetFileDialog();
+    const uint8array = new Uint8Array(result.data);
+    const dec = await ecdh.decrypt(uint8array) as Uint8Array;
+    const name = result.name.replace(/\.encdata$/, '');
+    DownloadFile(dec, name);
 }
 
 async function initData() {
@@ -260,22 +284,21 @@ function BuildUrl(parts: UrlPart[]): string {
 
         <h2>Encrypt/Decrypt</h2>
         <div class="enc-dec-wrapper flex-responsive-row">
-            <div style="flex: 1; width: 100%;">
-                <NInput v-model:value="plainText" type="textarea" placeholder="Plain Text..." style="flex: 1"
-                    rows="5" />
-            </div>
-
-            <div class="flex-responsive-column" style="gap: 1rem;">
-                <NButton @click="EncryptEventHandler" type="success"> {{ 'Encrypt' }}</NButton>
-                <NButton @click="DecryptEventHandler" type="info"> {{ 'Decrypt' }}</NButton>
-            </div>
-
-            <div style="flex: 1; width: 100%;">
-                <NInput v-model:value="encryptedText" type="textarea" placeholder="Encrypted Text..." rows="5" />
-            </div>
+            <DataBox v-model:data="plainText" title="Plain Data:" @ctrl+enter="EncryptEventHandler">
+                <template #default>
+                    <NButton @click="EncryptEventHandler" type="success">Encrypt</NButton>
+                    <NButton @click="EncryptFileEventHandler">Encrypt File</NButton>
+                </template>
+            </DataBox>
+            <DataBox v-model:data="encryptedText" title="Encrypted Data:" @ctrl+enter="DecryptEventHandler">
+                <template #default>
+                    <NButton @click="DecryptEventHandler" type="info">Decrypt</NButton>
+                    <NButton @click="DecryptFileEventHandler">Decrypt File</NButton>
+                </template>
+            </DataBox>
         </div>
 
-        <div>
+        <div style="margin-top: 1rem;">
             <NCheckbox v-model:checked="encryptedUrlIncludeShare" style="margin-left: auto;">
                 包括我的公钥. Include My Public Key.
             </NCheckbox>
@@ -317,7 +340,7 @@ input {
 
 .enc-dec-wrapper {
     align-items: flex-start;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .enc-dec-wrapper textarea {

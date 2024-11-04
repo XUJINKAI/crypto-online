@@ -4,7 +4,7 @@ import { sm2Curve } from './sm-crypto-v2/src/sm2/ec'
 import { hkdf } from './sm-crypto-v2/src/sm2/kx'
 import { hexToArray, leftPad } from './sm-crypto-v2/src/sm2'
 import { bytesToHex, hexToNumber, numberToHexUnpadded } from '@noble/curves/abstract/utils'
-import type { HexString } from './Data'
+import type { HexString, Utf8String } from './Data'
 
 export class EcdhClass {
   static isValidSecretKey = (secret: string) => /^[0-9a-fA-F]{64}$/.test(secret);
@@ -21,25 +21,39 @@ export class EcdhClass {
   my_public_error = ref<string>('')
   secret_error = ref<string>('')
 
-  encrypt(text: string) {
-    return new Promise((resolve, reject) => {
+  encrypt(text: Utf8String | Uint8Array) {
+    return new Promise<HexString | Uint8Array>((resolve, reject) => {
       if (!this.secret.value) return reject('No secret key')
       if (!/^[0-9a-fA-F]{64}$/.test(this.secret.value)) return reject('Invalid secret key')
       const key = this.secret.value.slice(0, 32)
       const iv = this.secret.value.slice(32)
-      const data = sm4.encrypt(text, key, { mode: 'cbc', iv: iv, output: 'string' })
-      resolve(data)
+      if (typeof text === 'string') {
+        const data = sm4.encrypt(text, key, { mode: 'cbc', iv: iv, output: 'string' })
+        resolve(data)
+      } else if (text instanceof Uint8Array) {
+        const data = sm4.encrypt(text, key, { mode: 'cbc', iv: iv, output: 'array' })
+        resolve(data)
+      } else {
+        reject('Invalid input')
+      }
     })
   }
 
-  decrypt(text: string) {
-    return new Promise((resolve, reject) => {
+  decrypt(text: HexString | Uint8Array) {
+    return new Promise<Utf8String | Uint8Array>((resolve, reject) => {
       if (!this.secret.value) return reject('No secret key')
       if (!/^[0-9a-fA-F]{64}$/.test(this.secret.value)) return reject('Invalid secret key')
       const key = this.secret.value.slice(0, 32)
       const iv = this.secret.value.slice(32)
-      const data = sm4.decrypt(text, key, { mode: 'cbc', iv: iv, output: 'string' })
-      resolve(data)
+      if (typeof text === 'string') {
+        const data = sm4.decrypt(text, key, { mode: 'cbc', iv: iv, output: 'string' })
+        resolve(data)
+      } else if (text instanceof Uint8Array) {
+        const data = sm4.decrypt(text, key, { mode: 'cbc', iv: iv, output: 'array' })
+        resolve(data)
+      } else {
+        reject('Invalid input')
+      }
     })
   }
 
