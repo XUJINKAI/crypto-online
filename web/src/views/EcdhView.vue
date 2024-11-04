@@ -335,8 +335,8 @@ function BuildUrl(parts: UrlPart[]): string {
         </div>
 
         <div class="help flex-responsive-row">
-            <MarkdownText :markdown="EcdhHelp.help_CN" style="flex: 1;"></MarkdownText>
-            <MarkdownText :markdown="EcdhHelp.help_EN" style="flex: 1;"></MarkdownText>
+            <MarkdownText :markdown="EcdhHelp.help_CN"></MarkdownText>
+            <MarkdownText :markdown="EcdhHelp.help_EN"></MarkdownText>
         </div>
     </div>
 </template>
@@ -383,5 +383,9 @@ input {
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid #ccc;
+}
+
+.help * {
+    flex: 1;
 }
 </style>

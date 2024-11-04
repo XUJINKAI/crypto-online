@@ -4,6 +4,9 @@ import { RouterLink, RouterView } from 'vue-router'
 import { NMenu, type MenuOption, NDialogProvider, NMessageProvider, NModalProvider } from 'naive-ui'
 const menuOptions: MenuOption[] = [
   {
+    label: () => h(RouterLink, { to: { name: 'home' } }, { default: () => 'Home' }), key: 'home'
+  },
+  {
     label: () => h(RouterLink, { to: { name: 'ecdh' } }, { default: () => 'ECDH' }), key: 'ecdh'
   },
   {
@@ -22,9 +25,6 @@ const menuOptions: MenuOption[] = [
 <template>
   <nav>
     <NMenu class="menu" :options="menuOptions" mode="horizontal" responsive />
-    <div class="right">
-      <a href="https://xujinkai.net/">Author</a>
-    </div>
   </nav>
 
   <div class="content">
