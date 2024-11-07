@@ -36,7 +36,7 @@ Author: https://xujinkai.net
 </script>
 
 <template>
-    <div>
+    <div style="padding: 0 1rem;">
         <div class="flex-responsive-row" style="gap: 1rem;">
             <MarkdownText :markdown="help_CN"></MarkdownText>
             <MarkdownText :markdown="help_EN"></MarkdownText>

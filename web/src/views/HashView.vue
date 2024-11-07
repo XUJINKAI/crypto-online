@@ -45,7 +45,7 @@ const share_url = computed(() => {
 </script>
 
 <template>
-    <div>
+    <div style="padding: 0 1rem;">
         <DataBox v-model:data="data" title="Input:" />
 
         <div style="height: 1rem;"></div>

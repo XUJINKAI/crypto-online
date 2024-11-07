@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { computed, ref, toRefs } from 'vue';
+import { computed, ref, toRefs, watch } from 'vue';
 import { NButton, NCard, NModal, useDialog } from 'naive-ui';
 import MarkdownText from './MarkdownText.vue';
 import { type LocalStorageSection } from '@/stores/LocalStorage';
@@ -7,17 +7,30 @@ import { type LocalStorageSection } from '@/stores/LocalStorage';
 const props = defineProps<{
     storage: LocalStorageSection,
     renderer?: (key: string, value: any) => { title: string, code: string } | null,
+    show?: boolean,
+    buttonVisible?: boolean,
 }>();
 
 const emit = defineEmits<{
     (e: 'storage:clear', data: void): void;
+    (e: 'update:show', data: boolean): void;
 }>();
 
 const dialog = useDialog();
 const { storage } = toRefs(props);
 
-const show_storage_panel = ref(false);
+const show = ref(props.show || false);
 const rendered = ref('');
+
+watch(() => props.show, (value) => {
+    if (value) {
+        refreshRendered();
+    }
+    show.value = value;
+});
+watch(() => show.value, (value) => {
+    emit('update:show', value);
+})
 
 function defaultRender(key: string, value: any) {
     if (typeof value === 'string') {
@@ -62,12 +75,13 @@ function clearStorageEventHandler() {
 </script>
 
 <template>
-    <NButton type="default" @click="refreshRendered(); show_storage_panel = true" size="small" style="color: black;">LocalStorage</NButton>
-    <NModal v-model:show="show_storage_panel">
+    <NButton v-if="buttonVisible" type="default" @click="show = true" size="small" style="color: black;">
+        LocalStorage</NButton>
+    <NModal v-model:show="show">
         <NCard class="card" :bordered="false" size="huge" role="dialog" aria-modal="true">
             <div class="header">
                 <NButton type="error" @click="clearStorageEventHandler">Clean Storage</NButton>
-                <NButton type="default" @click="show_storage_panel = false">Close</NButton>
+                <NButton type="default" @click="show = false">Close</NButton>
             </div>
             <MarkdownText :markdown="rendered" />
         </NCard>

@@ -1,6 +1,9 @@
 import moment from "moment";
 
-export function FormatTimestamp(timestamp: number): string {
+export function FormatTimestamp(timestamp: number | null): string {
+    if (timestamp === null) {
+        return "";
+    }
     const date = new Date(timestamp);
     return FormatDate(date);
 }

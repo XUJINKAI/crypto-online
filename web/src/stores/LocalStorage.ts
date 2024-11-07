@@ -1,4 +1,4 @@
-import { computed, ref, toRaw, type UnwrapRef } from "vue";
+import { computed, ref, toRaw, type Ref, type UnwrapRef } from "vue";
 
 function ensureSuffix(path: string, suffix: string = '_') {
     if (path.length === 0) {
@@ -11,7 +11,7 @@ function ensureSuffix(path: string, suffix: string = '_') {
 }
 
 export function SetLocalStorage<T>(key: string, value: T | null) {
-    if (value === null) {
+    if (!value) {
         localStorage.removeItem(key);
         return;
     }
@@ -21,7 +21,7 @@ export function SetLocalStorage<T>(key: string, value: T | null) {
 
 export function GetLocalStorage<T>(key: string): T | null {
     const serializedValue = localStorage.getItem(key);
-    if (serializedValue === null) {
+    if (!serializedValue) {
         return null;
     }
     try {
@@ -89,7 +89,12 @@ export class LocalStorageSection {
             set: (value: T | null) => {
                 SetLocalStorage(real_key, value);
             }
-        });
+        }) as Ref<T | null>;
+    }
+
+    getArrayRef<TItem>(key: string) {
+        const real_key = this.getKey(key);
+        return new LocalStorageArray<TItem>(real_key);
     }
 
     getSortedUniqueArrayRef<T>(key: string, limit: number = 10, fn_ItemEqual?: (a: T, b: T) => boolean) {
@@ -97,6 +102,62 @@ export class LocalStorageSection {
         return new LocalStorageSortedUniqueArray<T>(real_key, limit, fn_ItemEqual);
     }
 };
+
+export class LocalStorageArray<TItem> {
+    private _key: string;
+    private _data = ref<TItem[]>([]) as Ref<TItem[]>;
+
+    get key() { return this._key; }
+    get data() { return this._data; }
+
+    private RetriveData() {
+        return GetLocalStorage<TItem[]>(this._key) || [];
+    }
+
+    LoadData() {
+        this._data.value.splice(0, this._data.value.length);
+        const _data = this.RetriveData();
+        this._data.value.push(..._data);
+    }
+    SaveData() {
+        SetLocalStorage(this._key, this._data.value);
+    }
+
+    Find(predict: (value: TItem) => boolean): TItem | null {
+        return this._data.value.find(predict) ?? null;
+    }
+    First(predict?: (value: TItem) => boolean): TItem | null {
+        return predict ? this._data.value.find(predict) ?? null
+            : this._data.value[0] ?? null;
+    }
+
+    Remove(predict: (value: TItem) => boolean): number {
+        const removed = this._data.value.filter(predict);
+        this._data.value = this._data.value.filter(item => !removed.includes(item));
+        this.SaveData();
+        return removed.length;
+    }
+
+    Sort(predict: (a: TItem, b: TItem) => number) {
+        this._data.value.sort(predict);
+        this.SaveData();
+    }
+
+    Push(value: TItem) {
+        this._data.value.push(toRaw(value));
+        this.SaveData();
+    }
+
+    Clear() {
+        this._data.value = [];
+        this.SaveData();
+    }
+
+    constructor(key: string) {
+        this._key = key;
+        this.LoadData();
+    };
+}
 
 type ArrayItem<T> = {
     value: T;

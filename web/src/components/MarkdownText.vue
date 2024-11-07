@@ -28,12 +28,20 @@ const document = computed<string>(() => {
 }
 
 .markd p {
-    margin-bottom: 1rem;
+    margin-bottom: .2rem;
 }
 
 .markd code {
     border-radius: 4px;
     padding: 3px 6px;
+    background-color: rgba(142, 150, 170, .14);
+    display: inline;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.markd pre code {
+    border-radius: 4px;
     background-color: rgba(142, 150, 170, .14);
     display: block;
     width: 100%;

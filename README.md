@@ -8,6 +8,14 @@
 - 支持URL参数传参
 - 支持JS接口调用（F12控制台）
 
+### TODO
+
+- MSG支持文件
+- SM2, SM4
+- 对ECDH功能的进一步封装
+- 大文件支持
+- JS接口整理导出
+
 ## License
 
 MIT @ xujinkai.net

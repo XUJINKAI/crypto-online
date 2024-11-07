@@ -2,23 +2,50 @@
 import { h } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { NMenu, type MenuOption, NDialogProvider, NMessageProvider, NModalProvider } from 'naive-ui'
-const menuOptions: MenuOption[] = [
+
+const basePath = import.meta.env.BASE_URL
+
+const links = [
   {
-    label: () => h(RouterLink, { to: { name: 'home' } }, { default: () => 'Home' }), key: 'home'
+    label: 'Home',
+    key: 'home',
+    path: basePath,
   },
   {
-    label: () => h(RouterLink, { to: { name: 'ecdh' } }, { default: () => 'ECDH' }), key: 'ecdh'
+    label: 'Msg',
+    key: 'msg',
   },
   {
-    label: () => h(RouterLink, { to: { name: 'hash' } }, { default: () => 'Hash' }), key: 'hash'
+    label: 'ECDH',
+    key: 'ecdh',
+  },
+  // {
+  //   label: 'SM4',
+  //   key: 'sm4',
+  // },
+  {
+    label: 'Hash',
+    key: 'hash',
   },
   {
-    label: () => h(RouterLink, { to: { name: 'base64' } }, { default: () => 'Base64' }), key: 'base64'
+    label: 'Base64',
+    key: 'base64',
   },
   {
-    label: () => h(RouterLink, { to: { name: 'qrcode' } }, { default: () => 'QR Code' }), key: 'qrcode'
+    label: 'QR Code',
+    key: 'qrcode',
   },
 ]
+
+const menuOptions: MenuOption[] = links
+  .map((link) => ({
+    label: () => h(RouterLink, { to: { name: link.key } }, { default: () => link.label }),
+    key: link.key,
+  }))
+// .map((link) => ({
+//   label: () => h('a', { href: `${link.path || basePath + link.key}` }, link.label),
+//   key: link.key,
+// }))
 
 </script>
 
@@ -54,6 +81,7 @@ nav {
 }
 
 .content {
+  flex: 1;
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
@@ -62,8 +90,7 @@ nav {
 footer {
   text-align: center;
   margin-top: 1rem;
-  margin-bottom: 1rem;
-  padding: 1rem;
+  padding: .8rem;
   background-color: #f9f9f9;
   border-top: 1px solid #e9e9e9;
   color: #666;

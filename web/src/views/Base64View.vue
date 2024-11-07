@@ -64,7 +64,7 @@ const share_url = computed(() => {
 </script>
 
 <template>
-    <div>
+    <div style="padding: 0 1rem;">
         <div class="flex-responsive-row" style="gap: 1rem;">
             <DataBox v-model:data="plainData" title="Plain Data:" />
             <DataBox v-model:data="base64Data" title="Base64 Data:" :error="errorMsg != null" />

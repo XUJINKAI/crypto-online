@@ -51,7 +51,7 @@ const handleDownloadQRCode = () => {
 </script>
 
 <template>
-    <div>
+    <div style="padding: 0 1rem;">
         <h2>QR Code Generator</h2>
 
         <div class="flex-responsive-row" style="gap: 1rem; margin-top: 1rem;">

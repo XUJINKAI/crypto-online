@@ -344,6 +344,7 @@ function BuildUrl(parts: UrlPart[]): string {
 <style scoped>
 .wrapper {
     margin: 0 auto;
+    padding: 0 1rem;
     height: 100%;
     width: 100%;
     display: flex;

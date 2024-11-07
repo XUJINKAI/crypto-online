@@ -87,6 +87,11 @@ async function Share(e: MouseEvent) {
     font-weight: bold;
 }
 
+.share a:focus-visible {
+    outline: 0;
+    outline-offset: 0;
+}
+
 .share-button {
     margin-left: 1rem;
     float: right;
