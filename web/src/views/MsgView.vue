@@ -135,6 +135,17 @@ function getMsgOptions(msg: SessionHistoryItem) {
             },
         },
         {
+            // divider
+            type: 'render',
+            render: () => h('div', {
+                style: {
+                    'height': '1px',
+                    'background-color': '#ccc',
+                    'margin': '.5rem 0',
+                }
+            }),
+        },
+        {
             label: 'Copy Encrypted Hex',
             icon: () => h(Icon, { icon: 'copy' }),
             onClick: () => {
@@ -228,6 +239,8 @@ Decrypted Content:
 \`\`\`
 ${msg.plainData}
 \`\`\`
+
+time: ${FormatTimestamp(msg.created)}
 ` }),
         positiveText: 'OK',
     });
@@ -492,7 +505,7 @@ onUnmounted(() => {
                 <NInput ref='inputRef' v-model:value="inputData" placeholder="Input Data..." type="textarea"
                     style="max-height: 5rem;" :disabled="!currentSession" />
                 <div style="margin-top: .5rem;">
-                    <NButton type="info" @click="Decrypt_ClickEventHandler"
+                    <NButton type="default" @click="Decrypt_ClickEventHandler"
                         :render-icon="() => h(Icon, { icon: 'lockOn' })" :disabled="!currentSession">
                         Decrypt
                     </NButton>

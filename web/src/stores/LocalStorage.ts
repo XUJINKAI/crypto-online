@@ -150,7 +150,7 @@ export class LocalStorageArray<TItem> {
 
     Clear() {
         this._data.value = [];
-        this.SaveData();
+        SetLocalStorage(this._key, null);
     }
 
     constructor(key: string) {

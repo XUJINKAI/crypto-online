@@ -47,7 +47,7 @@ function defaultRender(key: string, value: any) {
 }
 
 function refreshRendered() {
-    let keys = Object.keys(storage.value.data);
+    let keys = Object.keys(storage.value.data).sort();
     let result = '';
     for (let key of keys) {
         let value = storage.value.data[key];

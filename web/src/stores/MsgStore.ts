@@ -19,12 +19,17 @@ export class MsgSessionHistory {
 
     get value() { return this._storage.data.value; }
 
+    private sort_data() {
+        this._storage.data.value.sort((a, b) => (a.created - b.created));
+    }
+
     push(item: SessionHistoryItem): SessionHistoryItem {
         const find = this._storage.data.value.find((i) => i.created === item.created);
         if (find) {
             return find;
         }
         this._storage.data.value.push(item);
+        this.sort_data();
         this._storage.SaveData();
         return item;
     }
@@ -43,6 +48,7 @@ export class MsgSessionHistory {
 
     constructor(storage: LocalStorageSection, sid: string) {
         this._storage = storage.getArrayRef<SessionHistoryItem>('history_' + sid);
+        this.sort_data();
     }
 }
 
@@ -186,7 +192,7 @@ export class MsgSessionManager {
             return this._classes.value.find(predict) ?? null;
         } else {
             if (this._classes.value.length == 0) return null;
-            return this._classes[0] as MsgSession ?? null;
+            return this._classes.value[0] as MsgSession ?? null;
         }
     }
 
@@ -257,10 +263,6 @@ export class MsgStore {
             return this._session_manager.getSession(session);
         }
         return null;
-    }
-
-    getRecentSession(): MsgSession | null {
-        return this._session_manager.First();
     }
 
     resetKeyPair() {
