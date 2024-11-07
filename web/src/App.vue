@@ -63,7 +63,7 @@ const menuOptions: MenuOption[] = links
   </div>
 
   <footer>
-    <p>© 2024 Github Source: <a href="https://github.com/XUJINKAI/crypto-online">XUJINKAI/crypto-online</a></p>
+    <p>© 2024 <a href="https://github.com/XUJINKAI/crypto-online">Github Source</a> 仅供交流学习使用</p>
   </footer>
 </template>
 

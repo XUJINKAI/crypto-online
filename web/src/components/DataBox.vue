@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { computed, ref, toRefs, withDefaults } from 'vue';
+import { computed, ref, toRefs } from 'vue';
 import { NInput, NButton, type InputInst } from 'naive-ui';
 import { type HexString } from '@/crypto/Data';
 

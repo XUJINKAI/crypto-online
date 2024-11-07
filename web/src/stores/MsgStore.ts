@@ -230,12 +230,17 @@ export class MsgStore {
 
     getSession(sid: string | null, pk?: string | null): MsgSession | null {
         // find and validate sid and pk
+        // new: pk
+        // new with msg: sid, pk
+        // psk: sid
+        // my msg: sid, my_pk
         if (!sid && !pk) { return null; }
 
         let session: MsgSession | null = null;
         if (sid) {
             session = this._session_manager.Find(sid);
-        } else if (pk) {
+        }
+        if (!session && pk) {
             session = this._session_manager.First((item) => item.index.params.type == 'ecdh'
                 // 只检测other_public_key，因为所有session的my_public_key都符合条件
                 && (item.index.params.other_public_key === pk));
@@ -270,7 +275,7 @@ export class MsgStore {
         }
     }
 
-    saveSessions(){
+    saveSessions() {
         this._session_manager.SaveData();
     }
 
