@@ -39,8 +39,10 @@ const currentHistory = computed(() => {
 const currentSessionName = computed({
     get: () => currentSession.value?.tag || '',
     set: (v) => {
-        if (currentSession.value)
+        if (currentSession.value) {
             currentSession.value.tag = v;
+            msgStore.saveSessions();
+        }
     }
 })
 
@@ -265,7 +267,12 @@ function ProcessUrlParameter() {
                 currentHistory.value?.push(item);
                 url_decrypt_success(item);
             } else {
-                throw new Error('Session Not Found. \n\nIf data is encrypted by pre-shared-key (psk), please create a new session with the same psk, then try again.');
+                throw new Error(`Session not found.
+
+### PSK (Pre-Shared-Key) Situation:
+
+Create a New Session with the **Same PSK**, then try again.
+`);
             }
         } else if (!currentSession.value) {
             currentSession.value = msgStore.getSession(lastSelectedSessionSid.value);
@@ -572,14 +579,12 @@ onUnmounted(() => {
                     </div>
                     <div v-if="currentSession?.index.params.type === 'ecdh'">
                         <span style="font-weight: bold;">My Public Key: </span>
-                        <span style='word-break: break-all; user-select: all;'>{{
-                            currentSession?.index.params.my_public_key
-                            }}</span>
+                        <span style='word-break: break-all; user-select: all;'>
+                            {{ currentSession?.index.params.my_public_key }}</span>
                         <br />
                         <span style="font-weight: bold;">Other's Public Key: </span>
-                        <span style='word-break: break-all; user-select: all;'>{{
-                            currentSession?.index.params.other_public_key
-                            }}</span>
+                        <span style='word-break: break-all; user-select: all;'>
+                            {{ currentSession?.index.params.other_public_key }}</span>
                     </div>
                     <div>
                         <span style="font-weight: bold;">Danger:</span><br />

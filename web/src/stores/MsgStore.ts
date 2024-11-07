@@ -270,6 +270,10 @@ export class MsgStore {
         }
     }
 
+    saveSessions(){
+        this._session_manager.SaveData();
+    }
+
     getHistory(sid?: string): MsgSessionHistory | null {
         if (!sid) {
             return null;
