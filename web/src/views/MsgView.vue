@@ -217,6 +217,20 @@ function getMsgOptions(msg: SessionHistoryItem) {
             }),
         },
         {
+            label: 'Swap Side',
+            icon: () => h(Icon, { icon: 'swap' }),
+            onClick: () => {
+                const item: SessionHistoryItem = {
+                    plainData: msg.plainData,
+                    encrypted: msg.encrypted,
+                    from: msg.from === 'me' ? 'other' : 'me',
+                    created: msg.created,
+                };
+                currentHistory.value?.remove(msg.created);
+                currentHistory.value?.push(item);
+            },
+        },
+        {
             label: 'Delete',
             props: { style: { color: 'red' } },
             icon: () => h(Icon, { icon: 'delete' }),
@@ -315,10 +329,12 @@ function ProcessUrlParameter() {
             if (currentSession.value) {
                 const ts = parseInt(url_msg_id || '0') || Date.now();
                 const r = currentSession.value.decrypt(url_encrypted);
+                const index = currentSession.value.index;
+                const from = index.params.type === 'ecdh' && index.params.my_public_key === url_share ? 'me' : 'other';
                 const item: SessionHistoryItem = {
                     plainData: r,
                     encrypted: url_encrypted,
-                    from: 'other',
+                    from: from,
                     created: ts,
                 };
                 currentHistory.value?.push(item);
