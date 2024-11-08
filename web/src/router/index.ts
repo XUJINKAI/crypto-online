@@ -57,16 +57,9 @@ const router = createRouter({
 })
 
 function EnsureGA4(ga4id: string) {
-  /* 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4Q0MVTQ7HL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-4Q0MVTQ7HL');
-    </script>
-  */
+  if (import.meta.env.DEV) {
+    return
+  }
   if (document.querySelector(`script[src="https://www.googletagmanager.com/gtag/js?id=${ga4id}"]`)) {
     // console.log('GA4 already loaded');
     return;

@@ -539,7 +539,7 @@ onUnmounted(() => {
                     <div>
                         <h3>My Private Key:</h3>
                         <NInput v-model:value='msgStore.my_key_pair.private' type='password' show-password-on='click'
-                            :autofocus="false" style="max-height: 5rem;" />
+                            readonly :autofocus="false" style="max-height: 5rem;" />
                         <p>
                             <span style="background-color: #f0f0f0; font-weight: bold; font-size: 1.1rem;">
                                 Please take care of your private key.
