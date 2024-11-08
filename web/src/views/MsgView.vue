@@ -22,6 +22,7 @@ import DataBox from '@/components/DataBox.vue';
 import Icon from '@/components/Icon';
 import StoragePanel from '@/components/StoragePanel.vue';
 import MarkdownText from '@/components/MarkdownText.vue';
+import { DownloadFile, GetFileDialog } from '@/stores/FileSystem';
 
 const message = useMessage();
 const dialog = useDialog();
@@ -46,6 +47,44 @@ const currentSessionName = computed({
     }
 })
 
+function EncDecAttachFile_ClickEventHandler() {
+    if (!currentSession.value) {
+        message.error('Please select a session first.');
+        return;
+    }
+    dialog.create({
+        title: 'Encrypt or Decrypt File.',
+        content: () => h(MarkdownText, { markdown: 'Choose Mode and select File...\n\nProcessed file will download automatically.' }),
+        positiveText: 'Encrypt File',
+        negativeText: 'Decrypt File',
+        onPositiveClick: () => {
+            GetFileDialog().then((file) => {
+                try {
+                    const encrypted = currentSession.value?.encrypt_arraybuffer(file.data);
+                    if (!encrypted) {
+                        throw new Error('Encrypt Failed.');
+                    }
+                    DownloadFile(encrypted, file.name + '.encdata');
+                } catch (e) {
+                    message.error('Encrypt File ' + e);
+                }
+            })
+        },
+        onNegativeClick: () => {
+            GetFileDialog().then((file) => {
+                try {
+                    const decrypted = currentSession.value?.decrypt_arraybuffer(file.data);
+                    if (!decrypted) {
+                        throw new Error('Decrypt Failed.');
+                    }
+                    DownloadFile(decrypted, file.name.replace(/\.encdata$/, ''));
+                } catch (e) {
+                    message.error('Decrypt File ' + e);
+                }
+            })
+        },
+    });
+}
 function EncryptAndCopyUrl_ClickEventHandler() {
     const input = inputData.value;
     if (!input || !currentSession.value) {
@@ -68,13 +107,18 @@ function EncryptAndCopyUrl_ClickEventHandler() {
         message.error('Error ' + e);
     }
 }
-function Decrypt_ClickEventHandler() {
+function DecryptHex_ClickEventHandler() {
     const input = inputData.value;
-    if (!input || !currentSession.value) {
+    if (!input) {
+        message.info('Decrypt HEX: Input Data is Empty.');
+        return;
+    }
+    if (!currentSession.value) {
+        message.error('Decrypt HEX: No Session Selected.');
         return;
     }
     if (!/^([0-9a-fA-F]{32})+$/.test(input)) {
-        message.error('Invalid Encrypted Data.');
+        message.error('Decrypt HEX: Invalid Encrypted Data.');
         return;
     }
     try {
@@ -505,14 +549,17 @@ onUnmounted(() => {
                 <NInput ref='inputRef' v-model:value="inputData" placeholder="Input Data..." type="textarea"
                     style="max-height: 5rem;" :disabled="!currentSession" />
                 <div style="margin-top: .5rem;">
-                    <NButton type="default" @click="Decrypt_ClickEventHandler"
+                    <NButton @click="DecryptHex_ClickEventHandler" title="Decrypt Hex String"
                         :render-icon="() => h(Icon, { icon: 'lockOn' })" :disabled="!currentSession">
-                        Decrypt
                     </NButton>
-                    <NButton style="float: right;" type="success" @click="EncryptAndCopyUrl_ClickEventHandler"
-                        :render-icon="() => h(Icon, { icon: 'lock' })" :disabled="!currentSession">
-                        Encrypt And Copy URL
-                    </NButton>
+                    <NButton @click="EncDecAttachFile_ClickEventHandler" title="Encrypt or Decrypt File"
+                        :render-icon="() => h(Icon, { icon: 'file' })" :disabled="!currentSession"></NButton>
+                    <div style="float: right;">
+                        <NButton type="success" @click="EncryptAndCopyUrl_ClickEventHandler"
+                            :render-icon="() => h(Icon, { icon: 'lock' })" :disabled="!currentSession">
+                            Encrypt & Copy URL
+                        </NButton>
+                    </div>
                 </div>
             </NLayoutContent>
         </NLayout>

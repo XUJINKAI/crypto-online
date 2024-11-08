@@ -92,6 +92,16 @@ export class MsgSession {
     decrypt(data: string): string {
         return sm4.decrypt(data, this._data.secret.key, { mode: 'cbc', iv: this._data.secret.iv, output: 'string' });
     }
+    encrypt_arraybuffer(data: ArrayBuffer): ArrayBuffer {
+        const input = new Uint8Array(data);
+        const output = sm4.encrypt(input, this._data.secret.key, { mode: 'cbc', iv: this._data.secret.iv, output: 'array' });
+        return output.buffer;
+    }
+    decrypt_arraybuffer(data: ArrayBuffer): ArrayBuffer {
+        const input = new Uint8Array(data);
+        const output = sm4.decrypt(input, this._data.secret.key, { mode: 'cbc', iv: this._data.secret.iv, output: 'array' });
+        return output.buffer;
+    }
 
     private constructor(msgstore: MsgStore, data: SessionIndex) {
         this._msgstore = msgstore;
