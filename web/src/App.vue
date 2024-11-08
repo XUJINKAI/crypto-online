@@ -1,52 +1,21 @@
 <script setup lang="ts">
 import { h } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
+import { routes } from './router';
+import { RouterLink, RouterView, type RouteRecordRaw } from 'vue-router'
 import { NMenu, type MenuOption, NDialogProvider, NMessageProvider, NModalProvider } from 'naive-ui'
 
 const basePath = import.meta.env.BASE_URL
 
-const links = [
-  {
-    label: 'Home',
-    key: 'home',
-    path: basePath,
-  },
-  {
-    label: 'Msg',
-    key: 'msg',
-  },
-  {
-    label: 'ECDH',
-    key: 'ecdh',
-  },
-  // {
-  //   label: 'SM4',
-  //   key: 'sm4',
-  // },
-  {
-    label: 'Hash',
-    key: 'hash',
-  },
-  {
-    label: 'Base64',
-    key: 'base64',
-  },
-  {
-    label: 'QR Code',
-    key: 'qrcode',
-  },
-]
+function routesToMenuOptions(routes: RouteRecordRaw[]): MenuOption[] {
+  return routes
+    .filter((route) => route.meta?.title)
+    .map((route) => ({
+      label: () => h(RouterLink, { to: { name: route.name } }, { default: () => route.meta?.title }),
+      key: route.name,
+    } as MenuOption))
+}
 
-const menuOptions: MenuOption[] = links
-  .map((link) => ({
-    label: () => h(RouterLink, { to: { name: link.key } }, { default: () => link.label }),
-    key: link.key,
-  }))
-// .map((link) => ({
-//   label: () => h('a', { href: `${link.path || basePath + link.key}` }, link.label),
-//   key: link.key,
-// }))
-
+const menuOptions: MenuOption[] = routesToMenuOptions(routes)
 </script>
 
 <template>
