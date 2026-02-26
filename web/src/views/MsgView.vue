@@ -340,12 +340,15 @@ function ProcessUrlParameter() {
                 currentHistory.value?.push(item);
                 url_decrypt_success(item);
             } else {
-                throw new Error(`Session not found.
-
-### PSK (Pre-Shared-Key) Situation:
-
-Create a New Session with the **Same PSK**, then try again.
-`);
+                // No session found — open PSK input dialog instead of throwing
+                pskDialogEncrypted.value = url_encrypted;
+                pskDialogMsgId.value = url_msg_id;
+                pskDialogUrlShare.value = url_share;
+                pskDialogUrlSid.value = url_sid;
+                pskDialogError.value = '';
+                pskDialogInput.value = '';
+                pskDialogShow.value = true;
+                return; // don't fall into catch
             }
         } else if (!currentSession.value) {
             currentSession.value = msgStore.getSession(lastSelectedSessionSid.value);
@@ -427,6 +430,49 @@ function newSessionPskStart() {
         newSessionModalShow.value = false;
     } else {
         //
+    }
+}
+// PSK decrypt dialog
+const pskDialogShow = ref(false);
+const pskDialogInput = ref('');
+const pskDialogError = ref('');
+const pskDialogEncrypted = ref<string | null>(null);
+const pskDialogMsgId = ref<string | null>(null);
+const pskDialogUrlShare = ref<string | null>(null);
+const pskDialogUrlSid = ref<string | null>(null);
+function tryPskDecrypt() {
+    const psk = pskDialogInput.value.trim();
+    if (!psk) {
+        pskDialogError.value = 'Please enter a PSK.';
+        return;
+    }
+    try {
+        // Step 1: Create a temporary session (NOT added to session list yet)
+        const tempSession = MsgSession.createPskSession(msgStore, psk);
+        // Step 2: Validate SID matches the URL's sid
+        if (pskDialogUrlSid.value && tempSession.index.sid !== pskDialogUrlSid.value) {
+            pskDialogError.value = `SID mismatch: expected ${pskDialogUrlSid.value}, got ${tempSession.index.sid}.\nThe PSK does not match this session.`;
+            return;
+        }
+        // Step 3: Try to decrypt
+        const encrypted = pskDialogEncrypted.value!;
+        const r = tempSession.decrypt(encrypted);
+        // Both checks passed — now persist the session
+        const session = msgStore.getPskSession(psk);
+        const ts = parseInt(pskDialogMsgId.value || '0') || Date.now();
+        const from = 'other' as const;
+        const item: SessionHistoryItem = {
+            plainData: r,
+            encrypted: encrypted,
+            from: from,
+            created: ts,
+        };
+        currentSession.value = session;
+        currentHistory.value?.push(item);
+        pskDialogShow.value = false;
+        url_decrypt_success(item);
+    } catch (e) {
+        pskDialogError.value = `Decryption failed. Please check your PSK and try again.\n${e}`;
     }
 }
 // current session
@@ -669,6 +715,27 @@ onUnmounted(() => {
                             Delete Session
                         </NButton>
                     </div>
+                </div>
+            </NCard>
+        </NModal>
+        <!-- PSK Decrypt Dialog -->
+        <NModal v-model:show="pskDialogShow" :mask-closable="false">
+            <NCard :bordered="false" size="huge" role="dialog" aria-modal="true" style="max-width: 500px;">
+                <p style="font-weight: bold; font-size: 1.2rem; margin-bottom: .5rem;">Session Not Found</p>
+                <p style="margin-bottom: 1rem; color: #666;">
+                    No matching session was found to decrypt this message.<br />
+                    If this is a PSK (Pre-Shared-Key) encrypted message, please enter the PSK below:
+                </p>
+                <NInput v-model:value='pskDialogInput' placeholder="Enter Pre-Shared-Key..."
+                    type="password" show-password-on='click'
+                    @keydown.enter="tryPskDecrypt" />
+                <p v-if="pskDialogError"
+                    style="color: red; margin-top: .5rem; font-size: .9rem; white-space: pre-wrap;">
+                    {{ pskDialogError }}
+                </p>
+                <div style="margin-top: 1rem; display: flex; gap: .5rem; justify-content: flex-end;">
+                    <NButton @click="pskDialogShow = false">Cancel</NButton>
+                    <NButton type="primary" @click="tryPskDecrypt">Decrypt</NButton>
                 </div>
             </NCard>
         </NModal>
