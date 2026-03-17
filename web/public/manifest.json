@@ -1,0 +1,13 @@
+{
+  "name": "Crypto Online",
+  "short_name": "Crypto",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
